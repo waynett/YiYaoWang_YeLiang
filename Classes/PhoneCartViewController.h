@@ -64,4 +64,6 @@
 -(void)refreshCart;
 
 -(void)toastShowString:(NSString *)string;
+
+- (void)doReloadCart;
 @end

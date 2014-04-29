@@ -24,14 +24,11 @@
 {
     self=[super initWithFrame:frame];
     if (self) {
-        UIImageView *imageView=[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
-        [imageView setImage:[UIImage imageNamed:@"searchBar_bg.png"]];
-        [self addSubview:imageView];
-        [imageView release];
-        
-        m_SearchBar=[[SearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
+
+        m_SearchBar=[[SearchBar alloc] initWithFrame:CGRectMake(0, 0, 260, 40)];
         [m_SearchBar setPlaceholder:@"输入搜索关键字"];
         [m_SearchBar setDelegate:delegate];
+        [m_SearchBar setTranslucent:YES];
         [self addSubview:m_SearchBar];
         if ([delegate respondsToSelector:@selector(setM_HomePageSearchBar:)]) {
             [delegate performSelector:@selector(setM_HomePageSearchBar:) withObject:m_SearchBar];

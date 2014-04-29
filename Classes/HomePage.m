@@ -68,6 +68,9 @@
 #define MODEAL_IMAGE_WIDTH  52
 #define MODEAL_IMAGE_HEIGHT 52
 
+#define searchViewTag  8060
+#define scanViewTag    8081
+
 @interface HomePage()
 
 -(void)saveAdModulesToLocal:(AdvertisingPromotion *)adPromotion;
@@ -171,56 +174,17 @@
 //初始化首页UI
 -(void)initHomePageUI
 {
-    //    [self.view setBackgroundColor:[UIColor colorWithRed:223.0/255.0 green:223.0/255.0 blue:223.0/255.0 alpha:1.0]];
     CGFloat yValue=0.0;
-    //logo栏
-    UIImageView *titleView=[[UIImageView alloc]initWithFrame:CGRectMake(0,yValue,320,44)];
-    [titleView setImage:[UIImage imageNamed:@"title_bg.png"]];
-    [self.view addSubview:titleView];
-    [titleView release];
-    yValue+=44.0;
     
     UIImageView *logoDescribeView=[[UIImageView alloc]initWithFrame:CGRectMake(138,1,45,41)];
 	logoDescribeView.image=[UIImage imageNamed:@"homepage_logo.png"];
 //	[self.view addSubview:logoDescribeView];
 	[logoDescribeView release];
     
-    //logo栏-选择省份按钮
-	UIButton *selectedProvince=[[UIButton alloc]initWithFrame:CGRectMake(0, 0, 61, 44)];
-    [selectedProvince setTag:VIEW_TAG_SEL_PROVINCE_BUTTON];
-    [selectedProvince setTitleEdgeInsets:UIEdgeInsetsMake(0, 11, 0, 0)];
-    
-	if(m_CurrentProvinceStr==nil || [m_CurrentProvinceStr isEqualToString:@""])
-    {
-        //如果未切换过省份
-		[selectedProvince setTitle:@"上海" forState:UIControlStateNormal];
-		self.m_CurrentProvinceStr=[[[NSString alloc] initWithString:@"上海"] autorelease];
-	}
-    else
-    {
-		[selectedProvince setTitle:m_CurrentProvinceStr forState:0];
-	}
-    [selectedProvince setBackgroundImage:[UIImage imageNamed:@"title_GPS_btn.png"] forState:UIControlStateNormal];
-    [selectedProvince setBackgroundImage:[UIImage imageNamed:@"title_GPS_btn_sel.png"] forState:UIControlStateHighlighted];
-	selectedProvince.titleLabel.font=[UIFont boldSystemFontOfSize:13.0];
-    [selectedProvince.titleLabel setTextAlignment:NSTextAlignmentLeft];
-	selectedProvince.titleLabel.shadowColor = [UIColor darkGrayColor];
-	selectedProvince.titleLabel.shadowOffset = CGSizeMake(1.0, -1.0);
-	[selectedProvince setTitleColor:[UIColor whiteColor] forState:0];
-	[selectedProvince addTarget:self action:@selector(enterSwitchProvince) forControlEvents:UIControlEventTouchUpInside];
-	[self.view addSubview:selectedProvince];
-    [selectedProvince release];
-	
-    //搜索
-	OTSSearchView *searchView=[[OTSSearchView alloc] initWithFrame:CGRectMake(0, yValue, 320, 40) delegate:m_Search];
-    [self.view addSubview:searchView];
-    [searchView release];
-    yValue+=40.0;
-    
     //scroll view
-	m_ScrollView=[[UIScrollView alloc] initWithFrame:CGRectMake(0,yValue,320,327)];
+	m_ScrollView=[[UIScrollView alloc] initWithFrame:CGRectMake(0,yValue,320,327+84)];
     if (iPhone5) {
-        [m_ScrollView setFrame:CGRectMake(0,yValue,320,327+88)];
+        [m_ScrollView setFrame:CGRectMake(0,yValue,320,327+84+88)];
     }
 	[m_ScrollView setBackgroundColor:[UIColor clearColor]];
     //    [m_ScrollView setDelaysContentTouches:NO];
@@ -243,8 +207,23 @@
     CGFloat yValueInScroll=0.0;
     m_PageView=[[OTSPageView alloc] initWithFrame:CGRectMake(0, yValueInScroll, 320, 120) delegate:self showStatusBar:YES sleepTime:5];
     [m_ScrollView addSubview:m_PageView];
-    
     //yValueInScroll+=120.0;
+    
+    //搜索
+	OTSSearchView *searchView=[[OTSSearchView alloc] initWithFrame:CGRectMake(0, yValue+80, 260, 40) delegate:m_Search];
+    searchView.backgroundColor = [UIColor clearColor];
+    searchView.tag = searchViewTag;
+    [self.view addSubview:searchView];
+    [searchView release];
+//    yValue+=40.0;
+    
+    //扫描
+    UIButton *scanButton=[[UIButton alloc] initWithFrame:CGRectMake(270, yValue+80, 40, 40)];
+    [scanButton setBackgroundImage:[UIImage imageNamed:@"modelscan.png"] forState:UIControlStateNormal];
+    [scanButton addTarget:nil action:@selector(scan) forControlEvents:UIControlEventTouchUpInside];
+    scanButton.tag = scanViewTag;
+    [self.view addSubview:scanButton];
+    [scanButton release];
     
     // 功能模块
     [self initFunctionModules];
@@ -430,18 +409,20 @@
                 break;
                 
             case 1:
-                moduleName = @"浏览历史";
-                image = [UIImage imageNamed:@"modelhistory.png"];
+                moduleName=@"扫描";
+                image=[UIImage imageNamed:@"modelscan.png"];
                 break;
+            
             case 2:
                 moduleName = @"团购";
                 image = [UIImage imageNamed:@"modeltuan.png"];
                 break;
+            
             case 3:
-                moduleName=@"扫描";
-                image=[UIImage imageNamed:@"modelscan.png"];
+                moduleName = @"浏览历史";
+                image = [UIImage imageNamed:@"modelhistory.png"];
                 break;
-       
+                
             case 4:
                 moduleName=@"物流查询";
                 image=[UIImage imageNamed:@"modelflow.png"];
@@ -580,8 +561,22 @@
             break;
             
         }
-            
         case 1:
+        {
+            //扫描
+            [self removeSubControllerClass:[Scan class]];
+            Scan *scan=[[[Scan alloc] initWithNibName:@"Scan" bundle:nil] autorelease];
+            [self pushVC:scan animated:NO];
+            break;
+        }
+           
+        case 2:
+        {
+            //团购
+            [self enterIntoGroupList];
+            break;
+        }
+        case 3:
         {
             //历史记录
             [self removeSubControllerClass:[MyBrowse class]];
@@ -596,20 +591,8 @@
             [self enterLogisticQuery];
             break;
         }
-        case 3:
-        {
-            //扫描
-            [self removeSubControllerClass:[Scan class]];
-            Scan *scan=[[[Scan alloc] initWithNibName:@"Scan" bundle:nil] autorelease];
-            [self pushVC:scan animated:NO];
-            break;
-        }
-        case 2:
-        {
-            //团购
-            [self enterIntoGroupList];
-             break;
-        }
+        
+        
             
         default:
             break;
@@ -627,6 +610,11 @@
     [m_ScrollView setContentSize:CGSizeMake(320, yValueInScroll+increace*250.0)];
 }
 
+-(void)scan{
+    [self removeSubControllerClass:[Scan class]];
+    Scan *scan=[[[Scan alloc] initWithNibName:@"Scan" bundle:nil] autorelease];
+    [self pushVC:scan animated:NO];
+}
 
 #pragma mark    返回首页主页面
 -(void)returntoHomePage {
@@ -1184,6 +1172,17 @@
 {
     if (scrollView==m_ScrollView) {
         [m_RefreshHeaderView egoRefreshScrollViewDidScroll:scrollView];
+        
+        //让搜索框和扫描按钮随着滚动
+        UIView *searchView = [self.view viewWithTag:searchViewTag];
+        UIView *scanView = [self.view viewWithTag:scanViewTag];
+        if (scrollView.contentOffset.y>80.0) {
+            searchView.frame = CGRectMake(searchView.frame.origin.x, 0, searchView.frame.size.width, searchView.frame.size.height);
+            scanView.frame = CGRectMake(scanView.frame.origin.x, 0, scanView.frame.size.width, scanView.frame.size.height);
+        }else{
+            searchView.frame = CGRectMake(searchView.frame.origin.x, 80-scrollView.contentOffset.y, searchView.frame.size.width, searchView.frame.size.height);
+            scanView.frame = CGRectMake(scanView.frame.origin.x, 80-scrollView.contentOffset.y, scanView.frame.size.width, scanView.frame.size.height);
+        }
     }
 }
 

@@ -12,7 +12,6 @@
 #import "LocationVO.h"
 #import "SyncVO.h"
 #import "StatusVO.h"
-#import "XMLSerializeService.h"
 #import "XStream.h"
 #import "OTSEverybodyWantsMe.h"
 #import "OTSUtility.h"

@@ -13,7 +13,6 @@
 #import "GTMBase64.h"
 #import "TheStoreAppAppDelegate.h"
 #import "NSObject+OTS.h"
-#import "DataHandler.h"
 
 @interface OTSUserSwitcher ()
 @property EOTSUserType  currentUserType;

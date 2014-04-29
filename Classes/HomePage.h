@@ -80,5 +80,7 @@
 -(void)appStartLaunch;
 -(void)appWakeFromBackGround;
 -(void)homePageSearchBarBecomeFirstResponder;
+
+-(void)returntoHomePage;
 @end
 

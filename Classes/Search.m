@@ -81,6 +81,9 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 #define FLAG_CATEGORY   1
 #define FLAG_SORT       2
 
+
+#define searchViewTag  8060
+#define scanViewTag    8081
 //@synthesize listData;
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
@@ -189,7 +192,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     if ([m_SearchRelationTableView superview]!=nil) {
         [m_SearchRelationTableView removeFromSuperview];
     }
-    [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 320, 40)];
+    [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 260, 40)];
     [m_HomePageSearchBarCancelBtn setHidden:YES];
 }
 
@@ -202,7 +205,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 #pragma mark - 首页搜索
 -(void)homePageCancelBtnClicked
 {
-    [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 320, 40)];
+    [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 260, 40)];
     [m_HomePageSearchBarCancelBtn setHidden:YES];
     [m_HomePageSearchBar resignFirstResponder];
     [self closeSearchHistoryAndRelationView];
@@ -277,7 +280,8 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
             if (searchBar==m_HomePageSearchBar)
             {
                 [[SharedDelegate homePage].view addSubview:m_SearchRelationTableView];
-                [m_SearchRelationTableView setFrame:CGRectMake(0, 84, 320, [SharedDelegate homePage].view.frame.size.height-84)];
+                float y = [[SharedDelegate homePage].view viewWithTag:searchViewTag].frame.origin.y+40;
+                [m_SearchRelationTableView setFrame:CGRectMake(0, y, 320, [SharedDelegate homePage].view.frame.size.height-y)];
             }
         }
 		if (![[keyword substringWithRange:NSMakeRange(0, 1)] isEqualToString:@" "] && !getKeyWordRuning)
@@ -299,12 +303,15 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
             if (searchBar==m_HomePageSearchBar)
             {
                 [[SharedDelegate homePage].view addSubview:m_defaultHistoryView];
-                [m_defaultHistoryView setFrame:CGRectMake(0, 84, 320, [SharedDelegate homePage].view.frame.size.height-84)];
+                float y = [[SharedDelegate homePage].view viewWithTag:searchViewTag].frame.origin.y+40;
+                [m_defaultHistoryView setFrame:CGRectMake(0, y, 320, [SharedDelegate homePage].view.frame.size.height-y)];
             }
         } else {
             if (searchBar==m_HomePageSearchBar) {
                 [[SharedDelegate homePage].view addSubview:m_SearchHistoryView];
-                [m_SearchHistoryView setFrame:CGRectMake(0, 84, 320, [SharedDelegate homePage].view.frame.size.height-84)];
+                float y = [[SharedDelegate homePage].view viewWithTag:searchViewTag].frame.origin.y+40;
+                [m_SearchHistoryView setFrame:CGRectMake(0, y, 320, [SharedDelegate homePage].view.frame.size.height-y)];
+//                [m_SearchHistoryView setFrame:CGRectMake(0, 84, 320, [SharedDelegate homePage].view.frame.size.height-84)];
             }
             [m_SearchHistoryTableView setFrame:CGRectMake(0, 40, 320, [SharedDelegate homePage].view.frame.size.height-124)];
         }
@@ -325,7 +332,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 {
     if (searchBar==m_HomePageSearchBar) {
         [m_HomePageSearchBarCancelBtn setHidden:NO];
-        [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 272, 40)];
+        [m_HomePageSearchBar setFrame:CGRectMake(0, 0, 260, 40)];
     }
     if ([m_SearchRelationTableView superview] == nil) {
         [self showSearchView:searchBar keyword:[searchBar text]];
