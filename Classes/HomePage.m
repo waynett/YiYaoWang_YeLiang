@@ -409,12 +409,12 @@
                 break;
                 
             case 1:
-                moduleName=@"扫描";
-                image=[UIImage imageNamed:@"modelscan.png"];
+                moduleName = @"团购";
+                image = [UIImage imageNamed:@"modeltuan.png"];
                 break;
             
             case 2:
-                moduleName = @"团购";
+                moduleName = @"我的收藏";
                 image = [UIImage imageNamed:@"modeltuan.png"];
                 break;
             
@@ -563,17 +563,24 @@
         }
         case 1:
         {
-            //扫描
-            [self removeSubControllerClass:[Scan class]];
-            Scan *scan=[[[Scan alloc] initWithNibName:@"Scan" bundle:nil] autorelease];
-            [self pushVC:scan animated:NO];
+            //团购
+            [self enterIntoGroupList];
             break;
         }
            
         case 2:
         {
-            //团购
-            [self enterIntoGroupList];
+            //我的收藏
+            if ([GlobalValue getGlobalValueInstance].ywToken != nil)
+            {
+                MyFavorite *myFavorite = [[[MyFavorite alloc]initWithNibName:@"MyFavorite" bundle:nil] autorelease];
+                myFavorite->fromTag = FROM_HOMEPAGE_TO_FAVORITE;
+                [self pushVC:myFavorite animated:YES];
+            }
+            else
+            {
+                [SharedDelegate enterUserManageWithTag:15];
+            }
             break;
         }
         case 3:
@@ -584,16 +591,12 @@
             [self pushVC:browse animated:YES];
             break;
         }
-            
         case 4:
         {
             //物流查询
             [self enterLogisticQuery];
             break;
         }
-        
-        
-            
         default:
             break;
     }

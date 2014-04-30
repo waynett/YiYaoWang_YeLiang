@@ -222,8 +222,6 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 -(void)getRelationKeyWord:(NSString *)word
 {
 	NSAutoreleasePool *pool=[[NSAutoreleasePool alloc] init];
-    
-    
     YWSearchService *searchSer = [[YWSearchService alloc] init];
     NSDictionary *paramDic = @{@"word" : word,@"minScore":@"1",@"count":@"10"};
     NSArray *tempArray = [searchSer getSearchKeyword:paramDic];

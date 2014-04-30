@@ -1,12 +1,12 @@
 //
-//  CategoryViewController.m
+//  CategorySecondAndThirdViewController.m
 //  TheStoreApp
 //
-//  Created by jun yuan on 12-9-19.
-//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//  Created by YaoWang on 14-4-30.
+//
 //
 
-#import "CategoryViewController.h"
+#import "CategorySecondAndThirdViewController.h"
 #import "Page.h"
 #import "GlobalValue.h"
 #import "ProductService.h"
@@ -26,12 +26,11 @@
 colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 \
 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
-@interface CategoryViewController ()
+@interface CategorySecondAndThirdViewController ()
 @property(nonatomic, retain)NSMutableDictionary* cachedCategoryDic;
 @end
 
-@implementation CategoryViewController
+@implementation CategorySecondAndThirdViewController
 @synthesize categoryId;
 @synthesize titleText;
 @synthesize cateLevel;
@@ -60,30 +59,26 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     }
     return self;
 }
--(void)provinceChanged:(NSNotification *)notification{
-    if (![cateLevel intValue])
-    {
-        [self enterTopCategory:YES];
-    }
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self initSelf];
+    [self initViews];
+    [self refreshCategory];
 }
 
 - (void)initSelf
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(provinceChanged:) name:@"ProvinceChanged" object:nil];
     categoryArray=[[NSMutableArray alloc] init];
-    if (!titleText)
-    {
-        self.titleText=@"商品分类";
-    }
-    if (!categoryId)
-    {
-        self.categoryId=[NSNumber numberWithInt:0];
-    }
-
     DebugLog(@"%@",cateLevel);
-    if (!cateLevel)
+}
+
+-(void)provinceChanged:(NSNotification *)notification{
+    if (![cateLevel intValue])
     {
-        self.cateLevel=[NSNumber numberWithInt:0];
+        [self enterTopCategory:YES];
     }
 }
 
@@ -95,7 +90,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         OTSBaseViewController* vc=[controllers objectAtIndex:i];
         if ([vc isKindOfClass:[self class]])
         {
-            CategoryViewController*cateVc=(CategoryViewController*)vc;
+            CategorySecondAndThirdViewController *cateVc=(CategorySecondAndThirdViewController*)vc;
             if ([cateVc.cateLevel intValue])
             {
                 [cateVc.view removeFromSuperview];
@@ -110,18 +105,9 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     DebugLog(@"%@",controllers);
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    [self initSelf];
-    [self initViews];
-
-    [self refreshCategory];
-
-}
 
 -(void)refreshCategory{
-//    [categoryArray removeAllObjects];
+    //    [categoryArray removeAllObjects];
     [self showLoading:YES];
     [self otsDetatchMemorySafeNewThreadSelector:@selector(requestCateData) toTarget:self withObject:nil];
 }
@@ -157,7 +143,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         [backBtn setBackgroundImage:[UIImage imageNamed:@"title_left_btn_sel.png"] forState:UIControlStateHighlighted];
         backBtn.titleEdgeInsets=UIEdgeInsetsMake(0, 4, 0, 0);
         [backBtn addTarget:self action:@selector(backClick:) forControlEvents:UIControlEventTouchUpInside];
-       // [backBtn setTitle:@"返回" forState:UIControlStateNormal];
+        // [backBtn setTitle:@"返回" forState:UIControlStateNormal];
         [topNav addSubview:backBtn];
     }
     //分类列表
@@ -184,7 +170,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     {
         cateTable.tableHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0,cateTable.bounds.size.width, 1.0f)] autorelease];
     }
-
+    
     //加载提示
     infoLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 60, 320, 40)];
     [infoLabel setText:@"商品分类信息加载中，请稍候..."];
@@ -244,8 +230,8 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 }
 
 - (void)requestCateData{
-//    NSAutoreleasePool* pool=[[NSAutoreleasePool alloc] init];
-
+    //    NSAutoreleasePool* pool=[[NSAutoreleasePool alloc] init];
+    
     // 先读缓存，如果没有缓存才显示loading
     NSMutableArray* arr = [self getCateFromLocalByRootId:[categoryId intValue] == 0? @"-1" : [categoryId stringValue]];  //等于0时是根目录，否则根据分类id来
     
@@ -263,12 +249,10 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         dur = 1;
 #endif
         
-        
-        
         if (inerval - lastGetCategoryTime > dur)
         {
             //这个分类1天取一次
-//            [self startGetCategoryFromService];
+            //            [self startGetCategoryFromService];
             [self performSelectorOnMainThread:@selector(startGetCategoryFromService) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
         }
         else
@@ -276,16 +260,15 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
             [categoryArray removeAllObjects];
             [categoryArray addObjectsFromArray:arr];
             [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
-            
         }
-
+        
     }
     else
     {
         // 显示Loading
         [self performSelectorOnMainThread:@selector(makeLoadingVisible:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
         [self performSelectorOnMainThread:@selector(startGetCategoryFromService) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
-//        [self startGetCategoryFromService];
+        //        [self startGetCategoryFromService];
     }
 }
 
@@ -318,20 +301,20 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
                 }
             }
         }
-
+        
         for (CategoryInfo *cate in deletingCategoryArr)
         {
             [categoryArray removeObject:cate];
         }
         [deletingCategoryArr release];
-
+        
         
         [self saveCategoryToLocal:categoryArray];
         
         [self filterCategory:categoryArray rootId:[categoryId intValue]==0? @"-1" : [categoryId stringValue]];
         
         
-
+        
         [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
         
         //保存时间
@@ -354,7 +337,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         {
             int nid = [rs intForColumn:@"nid"];
             NSString *categoryName = [rs stringForColumn:@"categoryName"];
-
+            
             CategoryVO *cate=[[[CategoryVO alloc]init]autorelease];
             cate.nid = [NSNumber numberWithInt:nid];
             cate.categoryName = categoryName;
@@ -427,15 +410,15 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex{
-    DebugLog(@"%@",cateLevel);
-    if ([cateLevel intValue]==0) {
-        SharedDelegate.m_UpdateCategory=YES;
-        [SharedDelegate.tabBarController selectItemAtIndex:0];
-        [SharedDelegate.tabBarController setSelectedIndex:0];
-    }else {
-        CategoryViewController* cateVC= (CategoryViewController*)[ SharedDelegate.tabBarController.viewControllers objectAtIndex:1];
-        [cateVC enterTopCategory:YES];
-    }
+//    DebugLog(@"%@",cateLevel);
+//    if ([cateLevel intValue]==0) {
+//        SharedDelegate.m_UpdateCategory=YES;
+//        [SharedDelegate.tabBarController selectItemAtIndex:0];
+//        [SharedDelegate.tabBarController setSelectedIndex:0];
+//    }else {
+//        CategoryViewController* cateVC= (CategoryViewController*)[ SharedDelegate.tabBarController.viewControllers objectAtIndex:1];
+//        [cateVC enterTopCategory:YES];
+//    }
 }
 
 #pragma mark table
@@ -486,57 +469,9 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
             cell.textLabel.backgroundColor = [UIColor clearColor];
             cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
             cell.textLabel.textColor = UIColorFromRGB(0x333333);
-            
-//            if ([GlobalValue getGlobalValueInstance].cateLeveltrackArray.count < 3)
-//            {
-//                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-//            }
         }
         
     }
-    
-    
-    
-    
-    
-    /*  1号店原版 ---- Linpan
-    //第一级分类
-    if ([categoryId intValue]==0) {
-        CategoryVO* cateVO=(CategoryVO*)[OTSUtility safeObjectAtIndex:indexPath.row inArray:categoryArray];
-        cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"    %@",cateVO.categoryName] : @"";	// 每行文字
-        cell.textLabel.textAlignment = NSTextAlignmentLeft;			// 文字的位置
-        cell.textLabel.backgroundColor = [UIColor clearColor];		// 背景色
-        cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];	// 文字大小
-        cell.textLabel.textColor = UIColorFromRGB(0x333333);			// 文字颜色
-        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-    }else {//2,3,4级分类
-        //第一行显示全部
-        if (indexPath.row==0)
-        {
-            cell.textLabel.text =[NSString stringWithFormat:@"    %@",SHOWALLPRODUCT];	
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;			
-            cell.textLabel.backgroundColor = [UIColor clearColor];		
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];	
-            cell.textLabel.textColor = UIColorFromRGB(0xAA1E1E);		
-        }
-        
-        else
-        {
-            CategoryVO* cateVO=(CategoryVO*)[categoryArray objectAtIndex:indexPath.row-1];
-            cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"    %@",cateVO.categoryName] : @"";	
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;			
-            cell.textLabel.backgroundColor = [UIColor clearColor];		
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];	
-            cell.textLabel.textColor = UIColorFromRGB(0x333333);
-            
-            if ([GlobalValue getGlobalValueInstance].cateLeveltrackArray.count < 3)
-            {
-                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            }
-        }
-
-    }*/
-    
     return cell;
 }
 
@@ -574,116 +509,63 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
-    CategoryInfo* cateVO=nil;
-    cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
-    if ([categoryId intValue]==0)
-    {
-        //第一级分类
-        cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
-        [self pushCateLevel:[NSNumber numberWithInt:0]];
-        
-        
-        /////显示子分类，，第一级分类默认必须有子类
-        CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-        cateVC.titleText=cateVO.name;
-        cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-        cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-        [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-        [self pushVC:cateVC animated:YES fullScreen:YES];
-
-    }
-    else
-    {
-        //下面是第二，三级分类
-        if (indexPath.row==0)
-        {
-            //第一行特殊
-            cateVO=[[[CategoryInfo alloc] init] autorelease];
-            cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
-            cateVO.cid=[categoryId stringValue];
-            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-            [self pushToProductsView:cateVO];
-            return;
-        }
-        else
-        {
-            cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
-            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-            
-            //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
-            NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
-            if (sonCateArr.count > 0)
-            {
-                /////显示子分类
-                CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-                cateVC.titleText=cateVO.name;
-                cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-                cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-                [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-                [self pushVC:cateVC animated:YES fullScreen:YES];
-            }
-            else
-            {
-                 [self pushToProductsView:cateVO];
-            }
-
-        }
-    }
-    
-    
-        
-    
-   
-
-    
-    
-    
-    //1号店原版
-/*    CategoryVO* cateVO=nil;
-    cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
-    if ([categoryId intValue]==0)
-    {
-        //第一级分类
-        cateVO=(CategoryVO*)[categoryArray objectAtIndex:indexPath.row];
-        [self pushCateLevel:[NSNumber numberWithInt:0]];
-    }
-    else
-    {
-        if (indexPath.row==0)
-        {
-            cateVO=[[[CategoryVO alloc] init] autorelease];
-            cateVO.categoryName=[NSString stringWithFormat:@"全部(%@)",titleText];
-            cateVO.nid=categoryId;
-            [self pushCateLevel:[[cateVO.nid copy] autorelease]];
-            [self pushToProductsView:cateVO];
-            return;
-        }
-        else
-        {
-            cateVO=(CategoryVO*)[categoryArray objectAtIndex:indexPath.row-1];
-            [self pushCateLevel:[[cateVO.nid copy] autorelease]];
-            // 请读懂代码再做，这里还没到进入搜索列表的地方           
-//           [self pushToProductsView:cateVO];
-
-            if ([cateLevel intValue]==2)
-            {
-                //分类最多到3级
-                [self pushCateLevel:[[cateVO.nid copy] autorelease]];
-                [self pushToProductsView:cateVO];
-                return;
-            }
-        }
-    }
-    CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-    cateVC.titleText=cateVO.categoryName;
-    cateVC.categoryId=cateVO.nid;
-    cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-    [self pushCateLevel:[[cateVO.nid copy] autorelease]];
-    [self pushVC:cateVC animated:YES fullScreen:YES];
- */
-
+//    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+//    
+//    CategoryInfo* cateVO=nil;
+//    cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
+//    if ([categoryId intValue]==0)
+//    {
+//        //第一级分类
+//        cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
+//        [self pushCateLevel:[NSNumber numberWithInt:0]];
+//        
+//        
+//        /////显示子分类，，第一级分类默认必须有子类
+//        CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
+//        cateVC.titleText=cateVO.name;
+//        cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
+//        cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
+//        [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//        [self pushVC:cateVC animated:YES fullScreen:YES];
+//        
+//    }
+//    else
+//    {
+//        //下面是第二，三级分类
+//        if (indexPath.row==0)
+//        {
+//            //第一行特殊
+//            cateVO=[[[CategoryInfo alloc] init] autorelease];
+//            cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
+//            cateVO.cid=[categoryId stringValue];
+//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//            [self pushToProductsView:cateVO];
+//            return;
+//        }
+//        else
+//        {
+//            cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
+//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//            
+//            //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
+//            NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
+//            if (sonCateArr.count > 0)
+//            {
+//                /////显示子分类
+//                CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
+//                cateVC.titleText=cateVO.name;
+//                cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
+//                cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
+//                [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//                [self pushVC:cateVC animated:YES fullScreen:YES];
+//            }
+//            else
+//            {
+//                [self pushToProductsView:cateVO];
+//            }
+//            
+//        }
+//    }
 }
 
 
@@ -698,7 +580,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     }
     cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
     if(!([[cateLeveltrackArray peek] intValue] == [cateId intValue])||[cateLeveltrackArray count]==0)
-   {
+    {
         [cateLeveltrackArray push:cateId];
     }
 }
@@ -715,5 +597,22 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
 
 @end
