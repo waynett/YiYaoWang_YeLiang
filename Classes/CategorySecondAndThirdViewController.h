@@ -20,6 +20,7 @@
     NSMutableArray* cateLeveltrackArray;//跟踪分类筛选的层级
     
     UIAlertView *_errorAlert;
+    BOOL isComeSecond;
 }
 
 @property(nonatomic,retain)NSNumber* cateLevel;

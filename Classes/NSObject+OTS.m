@@ -79,7 +79,6 @@ void RunBlockAfterDelay(NSTimeInterval delay, void (^block)(void))
         } withObject:anArgument];
         
         return;
-
     }
 }
 

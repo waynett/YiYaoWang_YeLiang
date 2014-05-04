@@ -63,6 +63,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    isComeSecond = YES;
     [self initSelf];
     [self initViews];
     [self refreshCategory];
@@ -132,7 +133,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     titleLabel.backgroundColor=[UIColor clearColor];
     [topNav addSubview:titleLabel];
     [titleLabel release];
-    if ([categoryId intValue]!= 0)
+    if ([self.categoryId intValue]!= 0)
     {
         UIButton* backBtn=[UIButton buttonWithType:UIButtonTypeCustom];
         backBtn.frame=CGRectMake(0,0,61,44);
@@ -151,11 +152,11 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     //此处需要注意的是，当前程序结构下，tabbar上的vc是自动减掉了tabbar的高度，但是由此vc推出的新的vc的高度是不自动减去tabbar高度的
     if (cateLevel.intValue)
     {
-        rect=CGRectMake(0, 44, 320, self.view.frame.size.height-44-49);
+        rect=CGRectMake(0, 44, 120, self.view.frame.size.height-44-49);
     }
     else
     {
-        rect=CGRectMake(0, 44, 320, self.view.frame.size.height-44);
+        rect=CGRectMake(0, 44, 120, self.view.frame.size.height-44);
     }
     cateTable=[[UITableView alloc] initWithFrame:rect style:UITableViewStyleGrouped];
     cateTable.backgroundView=nil;
@@ -182,6 +183,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     [self.view addSubview:infoLabel];
     [infoLabel release];
 }
+
 - (void)backClick:(id)sender{
     cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
     [cateLeveltrackArray pop];
@@ -233,7 +235,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     //    NSAutoreleasePool* pool=[[NSAutoreleasePool alloc] init];
     
     // 先读缓存，如果没有缓存才显示loading
-    NSMutableArray* arr = [self getCateFromLocalByRootId:[categoryId intValue] == 0? @"-1" : [categoryId stringValue]];  //等于0时是根目录，否则根据分类id来
+    NSMutableArray* arr = [self getCateFromLocalByRootId:[self.categoryId intValue] == 0? @"-1" : [self.categoryId stringValue]];  //等于0时是根目录，否则根据分类id来
     
     if (arr.count>0)
     {
@@ -259,7 +261,12 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         {
             [categoryArray removeAllObjects];
             [categoryArray addObjectsFromArray:arr];
-            [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
+            if (isComeSecond) {//判断是“进入第二级分类时更新tableview”还是 “点击第二级分类出现第三季分类”
+                [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
+            }else{
+                [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
+            }
+            
         }
         
     }
@@ -311,11 +318,14 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         
         [self saveCategoryToLocal:categoryArray];
         
-        [self filterCategory:categoryArray rootId:[categoryId intValue]==0? @"-1" : [categoryId stringValue]];
+        [self filterCategory:categoryArray rootId:[self.categoryId intValue]==0? @"-1" : [self.categoryId stringValue]];
         
-        
-        
-        [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
+        if (isComeSecond) { //判断是“进入第二级分类时更新tableview”还是 “点击第二级分类出现第三季分类”
+            [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
+        }
+        else{
+            [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
+        }
         
         //保存时间
         NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0];
@@ -431,56 +441,21 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         [cell setBackgroundColor:[UIColor whiteColor]];
     }
     cell.accessoryType=UITableViewCellAccessoryNone;
-    // cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
-    //第一级分类
-    if ([categoryId intValue]==0)
+    if([self.categoryId intValue] != 0)
     {
-        CategoryInfo *cateVO=(CategoryInfo *)[OTSUtility safeObjectAtIndex:indexPath.row inArray:categoryArray];
-        cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"        %@",cateVO.name] : @"";	// 每行文字
-        cell.textLabel.textAlignment = NSTextAlignmentLeft;			// 文字的位置
-        cell.textLabel.backgroundColor = [UIColor clearColor];		// 背景色
-        cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];	// 文字大小
-        cell.textLabel.textColor = UIColorFromRGB(0x333333);			// 文字颜色
-        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-        
-        UIImageView *iconImage = [[UIImageView alloc] initWithFrame:CGRectMake(10, 7, 30, 30)];
-        iconImage.image = [UIImage imageNamed:[NSString stringWithFormat:@"No1CategoryIcon_0%d.png",indexPath.row+1]];
-        [cell addSubview:iconImage];
-        [iconImage release];
-    }
-    else
-    {
-        //2,3,4级分类
-        //第一行显示全部
-        if (indexPath.row==0)
-        {
-            cell.textLabel.text =[NSString stringWithFormat:@"    %@",SHOWALLPRODUCT];
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;
-            cell.textLabel.backgroundColor = [UIColor clearColor];
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
-            cell.textLabel.textColor = UIColorFromRGB(0xAA1E1E);
-        }
-        else
-        {
-            CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
-            cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"    %@",cateVO.name] : @"";
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;
-            cell.textLabel.backgroundColor = [UIColor clearColor];
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
-            cell.textLabel.textColor = UIColorFromRGB(0x333333);
-        }
-        
+        CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
+        cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"%@",cateVO.name] : @"";
+        cell.textLabel.textAlignment = NSTextAlignmentCenter;
+        cell.textLabel.backgroundColor = [UIColor clearColor];
+        cell.textLabel.font = [UIFont boldSystemFontOfSize:14.0];
+        cell.textLabel.textColor = UIColorFromRGB(0x333333);
     }
     return cell;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    if ([categoryId intValue]==0) {
-        return categoryArray.count;
-    }else {
-        return categoryArray.count+1;
-    }
+    return categoryArray.count;
 }
 
 -(void)pushToProductsView:(CategoryInfo*)categoryVO
@@ -493,7 +468,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     
     CategoryVO *allVO=[[CategoryVO alloc] init];
     allVO.categoryName=[NSString stringWithFormat:@"全部(%@)",titleText];
-    allVO.nid=categoryId;
+    allVO.nid=self.categoryId;
     NSMutableArray* tempArray=[[NSMutableArray alloc] init];
     [tempArray addObjectsFromArray:categoryArray];
     
@@ -509,74 +484,84 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-//    
-//    CategoryInfo* cateVO=nil;
-//    cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
-//    if ([categoryId intValue]==0)
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    CategoryInfo* cateVO=nil;
+    cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
+
+
+//    //下面是第二，三级分类
+//    if (indexPath.row==0)
 //    {
-//        //第一级分类
-//        cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
-//        [self pushCateLevel:[NSNumber numberWithInt:0]];
-//        
-//        
-//        /////显示子分类，，第一级分类默认必须有子类
-//        CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-//        cateVC.titleText=cateVO.name;
-//        cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-//        cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
+//        //第一行特殊
+//        cateVO=[[[CategoryInfo alloc] init] autorelease];
+//        cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
+//        cateVO.cid=[categoryId stringValue];
 //        [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//        [self pushVC:cateVC animated:YES fullScreen:YES];
-//        
+//        [self pushToProductsView:cateVO];
+//        return;
 //    }
 //    else
 //    {
-//        //下面是第二，三级分类
-//        if (indexPath.row==0)
-//        {
-//            //第一行特殊
-//            cateVO=[[[CategoryInfo alloc] init] autorelease];
-//            cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
-//            cateVO.cid=[categoryId stringValue];
+    
+    
+        cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
+        [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+        
+        //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
+        NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
+        if (sonCateArr.count > 0)
+        {
+            /////显示子分类
+            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+            isComeSecond = NO;
+            //更新categoryId，才能直接用二级分类的[self refreshCategory]，否则得写三级分类自己的refreshCategory
+            self.categoryId = [NSNumber numberWithInt:[cateVO.cid intValue]];
+            [self refreshCategory];//点击二级分类以后，获取三级分类的数据
+            
+            
+//            CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
+//            cateVC.titleText=cateVO.name;
+//            cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
+//            cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
 //            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//            [self pushToProductsView:cateVO];
-//            return;
-//        }
-//        else
-//        {
-//            cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
-//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//            
-//            //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
-//            NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
-//            if (sonCateArr.count > 0)
-//            {
-//                /////显示子分类
-//                CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-//                cateVC.titleText=cateVO.name;
-//                cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-//                cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-//                [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//                [self pushVC:cateVC animated:YES fullScreen:YES];
-//            }
-//            else
-//            {
-//                [self pushToProductsView:cateVO];
-//            }
-//            
-//        }
+//            [self pushVC:cateVC animated:YES fullScreen:YES];
+        }
+        else
+        {
+            [self pushToProductsView:cateVO];
+        }
 //    }
+    
 }
 
+
+#pragma mark - 点击第二级分类后，在界面右边显示第三级分类
+-(void)updateThirdCate{
+    for (int i=0; i<categoryArray.count; i++) {
+        UIButton *btn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [btn.layer setMasksToBounds:YES];//在设置了背景图片或颜色情况下，这里这是为YES，才能显示圆角
+        [btn.layer setCornerRadius:10.0];//设置矩形四个圆角半径
+        btn.Frame = CGRectMake(150, 80*(i+1), 50, 20);
+        btn.backgroundColor = [UIColor whiteColor];
+        CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:i];
+        NSString *tempStr = cateVO.name;
+        [btn setTitle:tempStr forState:UIControlStateNormal];
+        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [self.view addSubview:btn];
+        [btn release];
+    }
+    [self hideLoading];
+}
 
 #pragma mark --
 -(void)pushCateLevel:(NSNumber *)cateId;
 {
-    if ([categoryId intValue]==0)
+    if ([self.categoryId intValue]==0)
     {
         //点第一级分类的时候初始化
         [[GlobalValue getGlobalValueInstance].cateLeveltrackArray removeAllObjects];
-        [[GlobalValue getGlobalValueInstance].cateLeveltrackArray addObject:categoryId];
+        [[GlobalValue getGlobalValueInstance].cateLeveltrackArray addObject:self.categoryId];
     }
     cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
     if(!([[cateLeveltrackArray peek] intValue] == [cateId intValue])||[cateLeveltrackArray count]==0)

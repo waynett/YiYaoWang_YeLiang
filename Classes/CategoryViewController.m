@@ -19,6 +19,7 @@
 #import "YWProductService.h"
 #import "CategoryInfo.h"
 #import "GlobalValue.h"
+#import "CategorySecondAndThirdViewController.h"
 
 #define SHOWALLPRODUCT @"查看全部"
 
@@ -466,38 +467,34 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         [cell addSubview:iconImage];
         [iconImage release];
     }
-    else
-    {
-        //2,3,4级分类
-        //第一行显示全部
-        if (indexPath.row==0)
-        {
-            cell.textLabel.text =[NSString stringWithFormat:@"    %@",SHOWALLPRODUCT];
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;
-            cell.textLabel.backgroundColor = [UIColor clearColor];
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
-            cell.textLabel.textColor = UIColorFromRGB(0xAA1E1E);
-        }
-        else
-        {
-            CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
-            cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"    %@",cateVO.name] : @"";
-            cell.textLabel.textAlignment = NSTextAlignmentLeft;
-            cell.textLabel.backgroundColor = [UIColor clearColor];
-            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
-            cell.textLabel.textColor = UIColorFromRGB(0x333333);
-            
-//            if ([GlobalValue getGlobalValueInstance].cateLeveltrackArray.count < 3)
-//            {
-//                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-//            }
-        }
-        
-    }
-    
-    
-    
-    
+//    else
+//    {
+//        //2,3,4级分类
+//        //第一行显示全部
+//        if (indexPath.row==0)
+//        {
+//            cell.textLabel.text =[NSString stringWithFormat:@"    %@",SHOWALLPRODUCT];
+//            cell.textLabel.textAlignment = NSTextAlignmentLeft;
+//            cell.textLabel.backgroundColor = [UIColor clearColor];
+//            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
+//            cell.textLabel.textColor = UIColorFromRGB(0xAA1E1E);
+//        }
+//        else
+//        {
+//            CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
+//            cell.textLabel.text = cateVO ? [NSString stringWithFormat:@"    %@",cateVO.name] : @"";
+//            cell.textLabel.textAlignment = NSTextAlignmentLeft;
+//            cell.textLabel.backgroundColor = [UIColor clearColor];
+//            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0];
+//            cell.textLabel.textColor = UIColorFromRGB(0x333333);
+//            
+////            if ([GlobalValue getGlobalValueInstance].cateLeveltrackArray.count < 3)
+////            {
+////                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+////            }
+//        }
+//        
+//    }
     
     /*  1号店原版 ---- Linpan
     //第一级分类
@@ -586,7 +583,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         
         
         /////显示子分类，，第一级分类默认必须有子类
-        CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
+        CategorySecondAndThirdViewController* cateVC=[[[CategorySecondAndThirdViewController alloc] init] autorelease];
         cateVC.titleText=cateVO.name;
         cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
         cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
@@ -594,43 +591,43 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         [self pushVC:cateVC animated:YES fullScreen:YES];
 
     }
-    else
-    {
-        //下面是第二，三级分类
-        if (indexPath.row==0)
-        {
-            //第一行特殊
-            cateVO=[[[CategoryInfo alloc] init] autorelease];
-            cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
-            cateVO.cid=[categoryId stringValue];
-            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-            [self pushToProductsView:cateVO];
-            return;
-        }
-        else
-        {
-            cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
-            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-            
-            //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
-            NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
-            if (sonCateArr.count > 0)
-            {
-                /////显示子分类
-                CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-                cateVC.titleText=cateVO.name;
-                cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-                cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-                [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-                [self pushVC:cateVC animated:YES fullScreen:YES];
-            }
-            else
-            {
-                 [self pushToProductsView:cateVO];
-            }
-
-        }
-    }
+//    else
+//    {
+//        //下面是第二，三级分类
+//        if (indexPath.row==0)
+//        {
+//            //第一行特殊
+//            cateVO=[[[CategoryInfo alloc] init] autorelease];
+//            cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
+//            cateVO.cid=[categoryId stringValue];
+//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//            [self pushToProductsView:cateVO];
+//            return;
+//        }
+//        else
+//        {
+//            cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row-1];
+//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//            
+//            //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
+//            NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
+//            if (sonCateArr.count > 0)
+//            {
+//                /////显示子分类
+//                CategorySecondAndThirdViewController* cateVC=[[[CategorySecondAndThirdViewController alloc] init] autorelease];
+//                cateVC.titleText=cateVO.name;
+//                cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
+//                cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
+//                [self pushCateLevel:[[cateVO.cid copy] autorelease]];
+//                [self pushVC:cateVC animated:YES fullScreen:YES];
+//            }
+//            else
+//            {
+//                 [self pushToProductsView:cateVO];
+//            }
+//
+//        }
+//    }
     
     
         
