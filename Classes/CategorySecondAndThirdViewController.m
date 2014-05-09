@@ -35,6 +35,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 @synthesize titleText;
 @synthesize cateLevel;
 @synthesize cachedCategoryDic;
+@synthesize categoryIdSec;
 - (void)dealloc{
     DebugLog(@"categoryVc Dealloc");
     
@@ -44,6 +45,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     OTS_SAFE_RELEASE(titleText);
     OTS_SAFE_RELEASE(categoryArray);
     OTS_SAFE_RELEASE(cachedCategoryDic);
+//    OTS_SAFE_RELEASE(_thirdCateBtnView);
     
     _errorAlert.delegate = nil;
     [_errorAlert release];
@@ -63,7 +65,6 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    isComeSecond = YES;
     [self initSelf];
     [self initViews];
     [self refreshCategory];
@@ -73,6 +74,8 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(provinceChanged:) name:@"ProvinceChanged" object:nil];
     categoryArray=[[NSMutableArray alloc] init];
+    categoryArrayThird=[[NSMutableArray alloc] init];
+    
     DebugLog(@"%@",cateLevel);
 }
 
@@ -122,6 +125,11 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     topNav.image=[UIImage imageNamed:@"title_bg.png"];
     [self.view addSubview:topNav];
     [topNav release];
+    //放第三级分类按钮的view
+    UIView *tempview= [[UIView alloc] init];
+    tempview.frame = CGRectMake(120, topNav.frame.origin.y+44, 200, [UIScreen mainScreen].applicationFrame.size.height-49-(topNav.frame.origin.y+44));
+    self.thirdCateBtnView  = tempview;
+    [self.view addSubview:self.thirdCateBtnView];
     //标题
     UILabel* titleLabel=[[UILabel alloc] initWithFrame:CGRectMake(60, 0, 200, 44)];
     titleLabel.font=[UIFont boldSystemFontOfSize:20];
@@ -261,12 +269,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         {
             [categoryArray removeAllObjects];
             [categoryArray addObjectsFromArray:arr];
-            if (isComeSecond) {//判断是“进入第二级分类时更新tableview”还是 “点击第二级分类出现第三季分类”
-                [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
-            }else{
-                [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
-            }
-            
+            [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
         }
         
     }
@@ -320,12 +323,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
         
         [self filterCategory:categoryArray rootId:[self.categoryId intValue]==0? @"-1" : [self.categoryId stringValue]];
         
-        if (isComeSecond) { //判断是“进入第二级分类时更新tableview”还是 “点击第二级分类出现第三季分类”
-            [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
-        }
-        else{
-            [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
-        }
+        [self performSelectorOnMainThread:@selector(updateCateTable) withObject:nil waitUntilDone:[NSThread isMainThread]];
         
         //保存时间
         NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0];
@@ -489,70 +487,26 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     CategoryInfo* cateVO=nil;
     cateLeveltrackArray = [GlobalValue getGlobalValueInstance].cateLeveltrackArray;
 
-
-//    //下面是第二，三级分类
-//    if (indexPath.row==0)
-//    {
-//        //第一行特殊
-//        cateVO=[[[CategoryInfo alloc] init] autorelease];
-//        cateVO.name=[NSString stringWithFormat:@"全部(%@)",titleText];
-//        cateVO.cid=[categoryId stringValue];
-//        [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//        [self pushToProductsView:cateVO];
-//        return;
-//    }
-//    else
-//    {
+    cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
+    [self pushCateLevel:[[cateVO.cid copy] autorelease]];
     
-    
-        cateVO=(CategoryInfo *)[categoryArray objectAtIndex:indexPath.row];
+    //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
+    NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
+    if (sonCateArr.count > 0)
+    {
+        /////显示子分类
         [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-        
-        //确定是不是有子分类，如有那么继续。。。。。这里按照有没有子分类来判断，
-        NSMutableArray *sonCateArr = [self getCateFromLocalByRootId:cateVO.cid];
-        if (sonCateArr.count > 0)
-        {
-            /////显示子分类
-            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-            isComeSecond = NO;
-            //更新categoryId，才能直接用二级分类的[self refreshCategory]，否则得写三级分类自己的refreshCategory
-            self.categoryId = [NSNumber numberWithInt:[cateVO.cid intValue]];
-            [self refreshCategory];//点击二级分类以后，获取三级分类的数据
-            
-            
-//            CategoryViewController* cateVC=[[[CategoryViewController alloc] init] autorelease];
-//            cateVC.titleText=cateVO.name;
-//            cateVC.categoryId= [NSNumber numberWithInt:[cateVO.cid intValue]];
-//            cateVC.cateLevel=[NSNumber numberWithInt:[cateLevel intValue]+1];
-//            [self pushCateLevel:[[cateVO.cid copy] autorelease]];
-//            [self pushVC:cateVC animated:YES fullScreen:YES];
-        }
-        else
-        {
-            [self pushToProductsView:cateVO];
-        }
-//    }
-    
-}
-
-
-#pragma mark - 点击第二级分类后，在界面右边显示第三级分类
--(void)updateThirdCate{
-    for (int i=0; i<categoryArray.count; i++) {
-        UIButton *btn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        [btn.layer setMasksToBounds:YES];//在设置了背景图片或颜色情况下，这里这是为YES，才能显示圆角
-        [btn.layer setCornerRadius:10.0];//设置矩形四个圆角半径
-        btn.Frame = CGRectMake(150, 80*(i+1), 50, 20);
-        btn.backgroundColor = [UIColor whiteColor];
-        CategoryInfo* cateVO=(CategoryInfo *)[categoryArray objectAtIndex:i];
-        NSString *tempStr = cateVO.name;
-        [btn setTitle:tempStr forState:UIControlStateNormal];
-        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [self.view addSubview:btn];
-        [btn release];
+        self.categoryIdSec = [NSNumber numberWithInt:[cateVO.cid intValue]];
+        [self refreshThirdCategory];//点击二级分类以后，获取三级分类的数据
     }
-    [self hideLoading];
+    else
+    {
+        [self pushToProductsView:cateVO];
+    }
 }
+
+
+
 
 #pragma mark --
 -(void)pushCateLevel:(NSNumber *)cateId;
@@ -599,5 +553,143 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
     // Pass the selected object to the new view controller.
 }
 */
+#pragma mark - 显示第三极分类是的一些方法
+-(void)refreshThirdCategory{
+    //    [categoryArray removeAllObjects];
+    [self showLoading:YES];
+    [self otsDetatchMemorySafeNewThreadSelector:@selector(requestThirdCateData) toTarget:self withObject:nil];
+}
+
+- (void)requestThirdCateData{
+    // 先读缓存，如果没有缓存才显示loading
+    NSMutableArray* arr = [self getCateFromLocalByRootId:[self.categoryIdSec intValue] == 0? @"-1" : [self.categoryIdSec stringValue]];  //等于0时是根目录，否则根据分类id来
+    
+    if (arr.count>0)
+    {
+        NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0];
+        NSTimeInterval inerval = [date timeIntervalSince1970];
+        DebugLog(@"当前时间戳 %lf",inerval);
+        NSTimeInterval lastGetCategoryTime = [[NSUserDefaults standardUserDefaults] doubleForKey:@"kGetCategoryTime"];
+        DebugLog(@"上次获取分类时间 %lf",lastGetCategoryTime);
+        
+        NSInteger dur = 1*24*60*60;
+#ifdef DEBUG
+        dur = 1;
+#endif
+        
+        if (inerval - lastGetCategoryTime > dur)
+        {
+            //这个分类1天取一次
+            [self performSelectorOnMainThread:@selector(startGetThirdCategoryFromService) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
+        }
+        else
+        {
+            [categoryArrayThird removeAllObjects];
+            [categoryArrayThird addObjectsFromArray:arr];
+        
+            [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
+    
+        }
+        
+    }
+    else
+    {
+        // 显示Loading
+        [self performSelectorOnMainThread:@selector(makeLoadingVisible:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
+        [self performSelectorOnMainThread:@selector(startGetThirdCategoryFromService) withObject:[NSNumber numberWithBool:YES] waitUntilDone:YES];
+    }
+}
+
+- (void)startGetThirdCategoryFromService
+{
+    YWProductService *productSer = [[YWProductService alloc] init];
+    Page* tempPage = [productSer getCategory];
+    if (tempPage != nil)
+    {
+        [categoryArrayThird removeAllObjects];
+        [categoryArrayThird addObjectsFromArray:tempPage.objList];
+        
+        //过滤一些不要的
+        //过滤分类
+        NSMutableArray *deletingCategoryArr = [[NSMutableArray alloc] init];
+        for (id cateObj in categoryArrayThird)
+        {
+            CategoryInfo *cate = (CategoryInfo *)cateObj;
+            if ([cate.cid intValue] == 971229 || [cate.cid intValue] == 971246 || [cate.cid intValue] == 971258 || [cate.cid intValue]==965550 || [cate.cid intValue] == 965452 || [cate.cid intValue] == 965279 || [cate.cid intValue] == 965272 || [cate.cid intValue] == 965302 ||[cate.cid intValue] == 965311 ||[cate.cid intValue] == 971249 ||[cate.cid intValue] == 5009 ||[cate.cid intValue] == 965338 ||[cate.cid intValue] == 964287 ||[cate.cid intValue] == 964291 ||[cate.cid intValue] == 964294 ||[cate.cid intValue] == 965415 ||[cate.cid intValue] == 965426||[cate.cid intValue] ==965441||[cate.cid intValue] == 970015|| [cate.cid intValue] == 970030 || [cate.cid intValue] == 970041 || [cate.cid intValue] == 970898 || [cate.name rangeOfString:@"赠品"].location != NSNotFound || [cate.name rangeOfString:@"作废"].location != NSNotFound)
+            {
+                [deletingCategoryArr addObject:cate];
+            }
+            
+            //去掉成人用品  cid＝955306
+            if (![GlobalValue getGlobalValueInstance].bShowAdultCategory)
+            {
+                if ([cate.cid intValue] == 955306)
+                {
+                    [deletingCategoryArr addObject:cate];
+                }
+            }
+        }
+        
+        for (CategoryInfo *cate in deletingCategoryArr)
+        {
+            [categoryArrayThird removeObject:cate];
+        }
+        [deletingCategoryArr release];
+        
+        [self saveCategoryToLocal:categoryArrayThird];
+        
+        [self filterCategory:categoryArrayThird rootId:[self.categoryIdSec intValue]==0? @"-1" : [self.categoryIdSec stringValue]];
+        
+        [self performSelectorOnMainThread:@selector(updateThirdCate) withObject:nil waitUntilDone:[NSThread isMainThread]];
+        
+        //保存时间
+        NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0];
+        NSTimeInterval inerval = [date timeIntervalSince1970];
+        DebugLog(@"存储时间戳 %lf",inerval);
+        [[NSUserDefaults standardUserDefaults] setDouble:inerval forKey:@"kGetCategoryTime"];
+    }
+}
+
+#pragma mark - 点击第二级分类后，在界面右边显示第三级分类
+-(void)updateThirdCate{
+    [self.thirdCateBtnView removeAllSubviews];
+    float btnEndX = 10.0;
+    float btnEndY = 30.0;
+    for (int i=0; i<categoryArrayThird.count; i++) {
+        UIButton *btn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [btn.layer setMasksToBounds:YES];//在设置了背景图片或颜色情况下，这里这是为YES，才能显示圆角
+        [btn.layer setCornerRadius:10.0];//设置矩形四个圆角半径
+        btn.backgroundColor = [UIColor whiteColor];
+        
+        CategoryInfo* cateVO=(CategoryInfo *)[categoryArrayThird objectAtIndex:i];
+        NSString *tempStr = cateVO.name;
+        
+        //高度固定不折行，根据字的多少计算btn的宽度
+        btn.titleLabel.font = [UIFont systemFontOfSize:14.0];
+        CGSize size = [tempStr sizeWithFont:btn.titleLabel.font constrainedToSize:CGSizeMake(MAXFLOAT, 20.0)];
+        if (size.width+15.0+btnEndX>180.0) {
+            btnEndY +=30.0;
+            btnEndX = 10;
+        }
+        btn.Frame = CGRectMake(btnEndX, btnEndY, size.width+15.0, 20);
+        btnEndX += size.width+15.0+10;
+        btn.titleLabel.font = [UIFont systemFontOfSize:14.0];
+        [btn setTitle:tempStr forState:UIControlStateNormal];
+        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        btn.tag = i;
+        
+        [btn addTarget:self action:@selector(pushToProducts:) forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.thirdCateBtnView addSubview:btn];
+    }
+    [self hideLoading];
+}
+-(IBAction)pushToProducts:(id)sender{
+    UIButton *btn = [[UIButton alloc] init];
+    btn = sender;
+    int tag = btn.tag;
+    CategoryInfo * cateVO=(CategoryInfo *)[categoryArrayThird objectAtIndex:tag];
+    [self pushToProductsView:cateVO];
+}
 
 @end

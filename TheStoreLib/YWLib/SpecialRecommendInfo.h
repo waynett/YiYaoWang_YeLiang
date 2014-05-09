@@ -11,17 +11,25 @@
 
 typedef enum
 {
-    kYaoSpecialBrand = 1, //品牌列表
-    kYaoSpecialCatagory = 2, //分类列表
-    kYaoSpecialProduct = 3 //商品页面
+    kYaoSpecialBrand = 0, //品牌列表
+    kYaoSpecialCatagory = 1, //分类列表
+    kYaoSpecialProduct = 2 //商品页面
 }kYaoSpecialType;
 
 
 @interface SpecialRecommendInfo : NSObject<NSCoding>
 
-@property (copy, nonatomic) NSString *specialId;
-@property (copy, nonatomic) NSString *imageUrl;
-@property (copy, nonatomic) NSString *name;
+
+@property (copy, nonatomic) NSString *spaceCode;
+@property (copy, nonatomic) NSString *content;
+@property (copy, nonatomic) NSString *pic;
+@property (copy, nonatomic) NSString *title;
+
+@property (assign, nonatomic) int triggerType;
+@property (assign, nonatomic) int platId;
+@property (assign, nonatomic) int specialId;//id
+@property (assign, nonatomic) int areaId;
+
 @property (assign, nonatomic) kYaoSpecialType type;
 @property (assign, nonatomic) int sindex;
 @property (assign, nonatomic) int specialType;

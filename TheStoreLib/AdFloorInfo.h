@@ -10,8 +10,8 @@
 
 @interface AdFloorInfo : NSObject<NSCoding>
 
-@property(copy,nonatomic) NSString *title;
-@property(copy,nonatomic) NSString *titleImgUrl;
+@property(copy,nonatomic) id head;
+@property(copy,nonatomic) id bigPage;
 @property(retain, nonatomic) NSMutableArray *productList;
 @property(retain, nonatomic) NSArray *keywordList;
 

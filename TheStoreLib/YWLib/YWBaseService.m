@@ -19,8 +19,6 @@
 
 @implementation YWBaseService
 
-
-
 - (void)dealloc
 {
     [_httpRequest cancel];
@@ -32,7 +30,6 @@
 //发起请求 ，参数后面定，暂时只传一个接口名
 - (ResponseInfo *)startRequestWithMethod:(NSString *)method
 {
-    
 //    NSStringEncoding enc = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
     
     NSString *urlStr = [self getRequestUrlWithMethod:method];
@@ -80,10 +77,8 @@
             result.data = responseDic[@"data"];
             result.userId = nil;
         }
-        
         return [result autorelease];
     }
-
 }
 
 
@@ -147,18 +142,18 @@
     }
 }
 
-
 - (NSString *)getRequestUrlWithMethod:(NSString *)method
 {
+    //测试时，在这里os和sign里面的os都改成android，因为李丽这边iphone数据还没有配 已经okk
     NSString *timeReq = [NSString stringWithDate:[NSDate date] formater:@"yyyyMMddHHmmss"];
     NSString *unCodedSign = [NSString stringWithFormat:@"os=iphone&timestamp=%@&appkey=%@",timeReq,KAppKey];
     DebugLog(@"unCodedSign %@",unCodedSign);
     NSString *sign = [unCodedSign md5HexDigest];
     DebugLog(@"codedSign %@",sign);
 //测试服务器
-    NSString *ceshiUrlString = [NSString stringWithFormat:@"http://192.168.89.18:19121/ApiControl?sign=%@&timestamp=%@&os=iphone&venderId=%@&method=%@&signMethod=md5&format=json&type=mobile",sign,timeReq,kVenderId,method];
+    NSString *ceshiUrlString = [NSString stringWithFormat:@"http://192.168.89.18:19121/ApiControl?sign=%@&timestamp=%@&os=iphone&venderId=%@&method=%@&signMethod=md5&format=json&type=mobile&homepageversion=2",sign,timeReq,kVenderId,method];
 //李丽服务器
-    NSString *liLiUrlString = [NSString stringWithFormat:@"http://192.168.90.108/mobile-web/ApiControl?sign=%@&timestamp=%@&os=iphone&venderId=%@&method=%@&signMethod=md5&format=json&type=mobile",sign,timeReq,kVenderId,method];
+    NSString *liLiUrlString = [NSString stringWithFormat:@"http://192.168.90.108/mobile-web/ApiControl?sign=%@&timestamp=%@&os=iphone&venderId=%@&method=%@&signMethod=md5&format=json&type=mobile&homepageversion=2",sign,timeReq,kVenderId,method];
 //生产服务器 mobi.111.com.cn  ip = 101.226.186.3:8080
     NSString *urlString = [NSString stringWithFormat:@"http://mobi.111.com.cn/ApiControl?sign=%@&timestamp=%@&os=iphone&venderId=%@&method=%@&signMethod=md5&format=json&type=mobile",sign,timeReq,kVenderId,method/*,[GlobalValue getGlobalValueInstance].provinceId*/];
 //预生产
@@ -168,7 +163,8 @@
     {
         //0－>生产服务器
         DebugLog(@"URL-> %@",urlString);
-        return urlString;
+//        return urlString;
+        return ceshiUrlString;
     }
     else if ([GlobalValue getGlobalValueInstance].hostIndex == 1)
     {

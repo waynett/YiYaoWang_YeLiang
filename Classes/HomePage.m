@@ -286,7 +286,6 @@
     
     isRefreshingAd = NO;
     
-
     if (tempPage!=nil && ![tempPage isKindOfClass:[NSNull class]])
     {
         if (hotTopFivePage!=nil)
@@ -297,7 +296,7 @@
         for (int i=0; i<[hotTopFivePage.objList count]; i++)
         {
             NSString *fileName;
-            NSString *hotProductImgUrlStr=((SpecialRecommendInfo *)[hotTopFivePage.objList objectAtIndex:i]).imageUrl;
+            NSString *hotProductImgUrlStr=((SpecialRecommendInfo *)[hotTopFivePage.objList objectAtIndex:i]).pic;
             if (hotProductImgUrlStr==nil)
             {
                 continue;
@@ -308,7 +307,7 @@
             [DataController writeApplicationData:data name:fileName];
             [self savePagesToLocal:hotTopFivePage];
         }
-        
+    
         //楼层广告
         m_AdArray = [hotTopFivePage.adFloorList retain];
         [self performSelectorOnMainThread:@selector(updateHotPage) withObject:nil waitUntilDone:YES];
@@ -316,7 +315,6 @@
     }
     [self performSelectorOnMainThread:@selector(stopEgoRefresh) withObject:nil waitUntilDone:NO];
 
-    
     [productSer release];
     
 	[pool drain];
@@ -331,6 +329,7 @@
     //焦点图和楼层一起了
     [self updateCMSModuleA];
 }
+
 -(void)savePagesToLocal:(Page*)aPage
 {
     NSString *filename=[OTSUtility documentDirectoryWithFileName:@"SaveHotPages_130502.plist"];
@@ -363,7 +362,6 @@
 
 -(void)adjustModulesHeight{
     UIView*moduleView=[m_ScrollView viewWithTag:moduleTag];
-
     
     //8个模块被写死，所以不需要调整高度了－－－－ Linpan
     moduleView.frame=CGRectMake(0, 120, 320, 100);
@@ -383,7 +381,6 @@
 }
 -(void)initFunctionModules
 {
-    
     CGFloat yValueInScroll=120.0;
     UIView *moduleView=[[UIView alloc] initWithFrame:CGRectMake(0, yValueInScroll, 320, 100)];
     moduleView.tag=moduleTag;
@@ -402,7 +399,6 @@
         UIImage *image;
         switch (i)
         {
-                
             case 0:
                 moduleName=@"当季热销";
                 image=[UIImage imageNamed:@"modelRecommed.png"];
@@ -435,7 +431,6 @@
         
         [moduleView addSubview:button];
         [button release];
-        
         
         UILabel *label=[[UILabel alloc] initWithFrame:CGRectMake(xValue-13, yValue+53, MODEAL_IMAGE_WIDTH+26, 30)];
         [label setBackgroundColor:[UIColor clearColor]];
@@ -559,7 +554,7 @@
             RecommendViewController *recommendVC = [[[RecommendViewController alloc] initWithNibName:@"RecommendViewController" bundle:nil] autorelease];
             [self pushVC: recommendVC animated:YES];
             break;
-            
+
         }
         case 1:
         {
@@ -610,7 +605,7 @@
     [modelATable reloadData];
     [self adjustModulesHeight];
     int  increace = m_AdArray.count;
-    [m_ScrollView setContentSize:CGSizeMake(320, yValueInScroll+increace*250.0)];
+    [m_ScrollView setContentSize:CGSizeMake(320, yValueInScroll+increace*180.0)];
 }
 
 -(void)scan{
@@ -628,6 +623,7 @@
     [self setUniqueScrollToTopFor:m_ScrollView];
     [self removeSubControllerClass:[BrandStoreViewController class]];
     [self removeAllMyVC];
+    
     [m_ScrollView setContentOffset:CGPointZero animated:YES];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"ResignFirstResponderFromHomepage" object:self];
 }
@@ -670,6 +666,50 @@
     }
 }
 
+#pragma mark - 楼层小按钮点击事件入口
+-(void)pushSmallBtn:(HomePageModelACell*)cell withIdent:(int)tag{
+    AdFloorInfo *floor = [OTSUtility safeObjectAtIndex:cell.tag inArray:m_AdArray];
+    if (floor == nil)
+    {
+        return;
+    }
+
+    SpecialRecommendInfo *specialRecommentInfo = floor.productList[tag];
+    if (specialRecommentInfo.type == kYaoSpecialCatagory)
+    {
+        NSString *content = specialRecommentInfo.content;
+        int catalogId = [[content substringFromIndex:10] intValue];
+        [self enterIntoCategoryList:catalogId];
+    }
+}
+
+#pragma mark - 楼层 head 按钮点击事件入口
+-(void)pushHeadBtn:(HomePageModelACell*)cell{
+    AdFloorInfo *floor = [OTSUtility safeObjectAtIndex:cell.tag inArray:m_AdArray];
+    if (floor == nil)
+    {
+        return;
+    }
+    
+    NSDictionary *headInfo = floor.head;
+    
+    
+    if ([[headInfo objectForKey:@"triggerType"] intValue] == kYaoSpecialBrand)
+    {
+        [self showAlertView:@"" alertMsg:@"品牌页面暂时没有" alertTag:12321];
+    }
+    else if ([[headInfo objectForKey:@"triggerType"] intValue] == kYaoSpecialCatagory)
+    {
+        [self enterIntoCategoryList:[[headInfo objectForKey:@"platId"] intValue]];
+    }
+    //不可能从这里进去产品详情页
+//    else if ([[headInfo objectForKey:@"triggerType"] intValue] == kYaoSpecialProduct)
+//    {
+//        [self enterIntoProductView:[headInfo objectForKey:@""]];
+//    }
+}
+
+#pragma mark - 进入商品页面
 //进入商品页面
 - (void)enterIntoProductView:(NSUInteger)productId
 {
@@ -714,8 +754,6 @@
     [self pushVC:cateProduct animated:YES fullScreen:YES];
 }
 
-
-
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     DebugLog(@" m_AdArray.count--> %d", m_AdArray.count);
@@ -723,7 +761,7 @@
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 250.0;
+    return 180.0;
 }
 
 -(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -731,6 +769,7 @@
     HomePageModelACell* cell=[tableView dequeueReusableCellWithIdentifier:identify];
     if (cell==nil)
     {
+        cell.isLeft = indexPath.row%2;
         cell=[[[HomePageModelACell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identify] autorelease];
     }
     cell.delegate=self;
@@ -739,42 +778,37 @@
     AdFloorInfo *floor = m_AdArray[indexPath.row];
     if (floor && [floor isKindOfClass:[AdFloorInfo class]])
     {
-        NSLog(@"floor.keywordList  %@   %@",floor.keywordList,floor.title);
-        
-        cell.keywordsArray = floor.keywordList;
         cell.selectionStyle=UITableViewCellSelectionStyleNone;
+        cell.isLeft = indexPath.row%2;
         cell.tag=indexPath.row;
+    
+        NSDictionary *product = floor.bigPage;
+        NSString *strPic = [product objectForKey:@"pic"];
+        NSString *strTit = [product objectForKey:@"title"];
+        [cell loadBigImg:strPic title:strTit subTitle:strTit];
         
-        if (floor.productList.count >= 1)
-        {
-            SpecialRecommendInfo *product = floor.productList[0];
-            [cell loadBigImg:product.imageUrl title:product.name subTitle:product.name];
-        }
-        
-        if (floor.productList.count >= 2)
-        {
-            SpecialRecommendInfo *product1 = floor.productList[1];
-            [cell loadFistImg:product1.imageUrl title:product1.name subTitle:product1.name];
-        }
-        
-        if (floor.productList.count >= 3)
-        {
-            SpecialRecommendInfo *product2 = floor.productList[2];
-            [cell loadsecondImg:product2.imageUrl title:product2.name subTitle:product2.name];
-        }
-        
-        [cell loadTitleImage:floor.titleImgUrl];
-        
-        
-        int style= 1;
-        NSString* tit=floor.title;
-//        if (tit!=nil&&[tit isKindOfClass:[NSString class]]&&tit.length>0) {
-            [cell freshCell:indexPath.row style:style title:tit];
+        [cell loadBtn:floor];
+//
+//        if (floor.productList.count >= 2)
+//        {
+//            SpecialRecommendInfo *product1 = floor.productList[1];
+//            [cell loadFistImg:product1.pic title:product1.title subTitle:product1.title];
 //        }
+//        
+//        if (floor.productList.count >= 3)
+//        {
+//            SpecialRecommendInfo *product2 = floor.productList[2];
+//            [cell loadsecondImg:product2.pic title:product2.title subTitle:product2.title];
+//        }
+        
+//        int style= 1;
+//        NSString* tit=floor.pageTitle;
+//        [cell freshCell:indexPath.row style:style title:tit];
+        [cell loadHeadBtn:floor];
     }
     return cell;
-    
 }
+
 #pragma mark --
 
 //在tabbar上选择第一个时调用此方法 -----linpan 2013-7-13
@@ -813,15 +847,10 @@
     return mDictionary;
 }
 
-
-
-
 -(void)showError:(NSString *)errorInfo
 {
     [AlertView showAlertView:nil alertMsg:errorInfo buttonTitles:nil alertTag:ALERTVIEW_TAG_COMMON];
 }
-
-
 
 #pragma mark    物流查询
 -(void)enterLogisticQuery
@@ -1094,8 +1123,6 @@
     [downloadVO release];
 }
 
-
-
 #pragma mark   焦点图pageview相关delegate
 - (void)pageView:(OTSPageView *)pageView pageChangedTo:(NSIndexPath *)indexPath{
 }
@@ -1107,17 +1134,18 @@
         return;
     }
     
-    
     SpecialRecommendInfo *recommendInfo = [hotTopFivePage.objList objectAtIndex:index];
-    if (recommendInfo.type == kYaoSpecialBrand)
+    if (recommendInfo.platId == kYaoSpecialBrand)
     {
          [self showAlertView:@"" alertMsg:@"品牌页面暂时没有" alertTag:12321];
     }
-    else if (recommendInfo.type == kYaoSpecialCatagory)
+    else if (recommendInfo.platId == kYaoSpecialCatagory)
     {
-        [self enterIntoCategoryList:recommendInfo.catalogId];
+        NSString *content = recommendInfo.content;
+        int catalogId = [[content substringFromIndex:10] intValue];
+        [self enterIntoCategoryList:catalogId];
     }
-    else if (recommendInfo.type == kYaoSpecialProduct)
+    else if (recommendInfo.platId == kYaoSpecialProduct)
     {
         [self enterIntoProductView:recommendInfo.productId];
     }
@@ -1136,7 +1164,7 @@
 //        NSString *fileName=[((HotPointNewVO *)[hotTopFivePage.objList objectAtIndex:i]).picUrl stringFromMD5];
 //        UIImage *image=[ImageCache getImageFromFile:fileName];
         
-        NSString *fileName=[((SpecialRecommendInfo *)[hotTopFivePage.objList objectAtIndex:i]).imageUrl stringFromMD5];
+        NSString *fileName=[((SpecialRecommendInfo *)[hotTopFivePage.objList objectAtIndex:i]).pic stringFromMD5];
         UIImage *image=[ImageCache getImageFromFile:fileName];
         if (image != nil) {
             imageView.image = image;

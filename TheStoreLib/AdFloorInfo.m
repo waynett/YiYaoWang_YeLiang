@@ -12,27 +12,26 @@
 
 - (void)dealloc
 {
-    [_title release];
-    [_titleImgUrl release];
+    [_head release];
+    [_bigPage release];
     [_productList release];
     [_keywordList release];
     [super dealloc];
 }
 
 
-
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
-    [aCoder encodeObject:_title forKey:@"title"];
-    [aCoder encodeObject:_titleImgUrl forKey:@"titleUrl"];
+    [aCoder encodeObject:_head forKey:@"head"];
+    [aCoder encodeObject:_bigPage forKey:@"bigPage"];
     [aCoder encodeObject:_productList forKey:@"productList"];
     [aCoder encodeObject:_keywordList forKey:@"keywordList"];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
-    self.title = [aDecoder decodeObjectForKey:@"title"];
-    self.titleImgUrl = [aDecoder decodeObjectForKey:@"titleUrl"];
+    self.head = [aDecoder decodeObjectForKey:@"head"];
+    self.bigPage = [aDecoder decodeObjectForKey:@"bigPage"];
     self.productList = [aDecoder decodeObjectForKey:@"productList"];
     self.keywordList = [aDecoder decodeObjectForKey:@"keywordList"];
     return  self;

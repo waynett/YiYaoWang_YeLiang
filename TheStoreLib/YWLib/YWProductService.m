@@ -25,28 +25,35 @@
 {
      DebugLog(@"test520 自动登陆 YWProductService getHomeSpcecialList");
     
-    
-    ResponseInfo *response = [self startRequestWithMethod:@"gethomepage&city=c1001&area=c1001"];
+//    ResponseInfo *response = [self startRequestWithMethod:@"gethomepage&city=c1001&area=c1001"];
+
+    ResponseInfo *response = [self startRequestWithMethod:@"gethomepage&area=0"];
     DebugLog(@"gethomepage response==> %@",response);
     if (response.isSuccessful && response.statusCode == 200)
     {
         NSMutableArray *resultList = [[[NSMutableArray alloc] init] autorelease];
         
         NSDictionary *dataDic = response.data;
-        NSDictionary *jiaoDianTuDic = dataDic[@"index_jiaodiantu"];
-        NSArray *specials = jiaoDianTuDic[@"specials"];
-        for (NSDictionary *dic in specials)
+        NSArray *jiaoDianTuDic = dataDic[@"index_lb"];
+//        NSArray *specials = jiaoDianTuDic[@"specials"];
+        for (NSDictionary *dic in jiaoDianTuDic)
         {
             SpecialRecommendInfo *specialInfo = [[SpecialRecommendInfo alloc] init];
-            specialInfo.specialId = [dic[@"id"] stringValue];
-            specialInfo.imageUrl = dic[@"image_url"];
-            specialInfo.name = dic[@"name"];
-            specialInfo.type = [dic[@"type"] intValue];
-            specialInfo.sindex = [dic[@"sindex"] intValue];
-            specialInfo.specialType = [dic[@"specialtype"] intValue];
-            specialInfo.brandId = [dic[@"brandid"] intValue];
-            specialInfo.catalogId = [dic[@"catalogid"] intValue];
-            specialInfo.productId = [dic[@"productid"] intValue];
+            
+            specialInfo.spaceCode = dic[@"spaceCode"];
+            specialInfo.content = dic[@"content"];
+            specialInfo.pic = dic[@"pic"];
+            specialInfo.title = dic[@"title"];
+            
+            specialInfo.type = [dic[@"triggerType"] intValue];
+            specialInfo.platId = [dic[@"platId"] intValue];
+            specialInfo.specialId = [dic[@"id"] intValue];
+            specialInfo.areaId = [dic[@"areaId"] intValue];
+            
+//            specialInfo.type = [dic[@"type"] intValue];
+//            specialInfo.specialType = [dic[@"specialtype"] intValue];
+//            specialInfo.brandId = [dic[@"brandid"] intValue];
+//            specialInfo.productId = [dic[@"productid"] intValue];
             
             [resultList addObject:specialInfo];
             [specialInfo release];
@@ -54,32 +61,38 @@
         
         //楼层广告
         NSMutableArray *adFloorList = [[[NSMutableArray alloc] init] autorelease];
-        NSArray *floorArr = dataDic[@"index_ggl"];
+        NSArray *floorArr = dataDic[@"index_lc"];
         for (NSDictionary *dic in floorArr)
         {
             AdFloorInfo *floor = [[AdFloorInfo alloc] init];
-            NSDictionary *tiltDic = dic[@"title"];
-            floor.titleImgUrl = tiltDic[@"image_url"];
-            floor.title = tiltDic[@"name"];
+            NSDictionary *headDic = dic[@"head"];
+            NSDictionary *bigPageDic = dic[@"index_ggl_ggw_1"];
+            NSArray *keywordArr = dic[@"keyword"];
+            floor.head = headDic;
+        
+            floor.bigPage = bigPageDic;
         
             NSMutableArray *productListInAd = [[[NSMutableArray alloc] init] autorelease];
-            NSArray *indexArr = @[@"3",@"1",@"2"];
-            for (int i = 0;  i < 3;  ++i)
+//            NSArray *indexArr = @[@"3",@"1",@"2"];
+            for (int i = 0;  i < keywordArr.count;  ++i)
             {
-                NSString *ggl = [NSString stringWithFormat:@"index_ggl_ggw_%d",[indexArr[i] intValue]];
-                
-                NSDictionary * p1Dic = dic[ggl];
+//                NSString *ggl = [NSString stringWithFormat:@"index_ggl_ggw_%d",[indexArr[i] intValue]];
+//                
+//                NSDictionary * p1Dic = dic[ggl];
                 SpecialRecommendInfo *specialInfo = [[SpecialRecommendInfo alloc] init];
-                specialInfo.specialId = [p1Dic[@"id"] stringValue];
-                specialInfo.imageUrl = p1Dic[@"image_url"];
-                specialInfo.name = p1Dic[@"name"];
-                specialInfo.type = [p1Dic[@"type"] intValue];
-                specialInfo.sindex = [p1Dic[@"sindex"] intValue];
-                specialInfo.specialType = [p1Dic[@"specialtype"] intValue];
+                specialInfo.spaceCode = [keywordArr objectAtIndex:i][@"spaceCode"];
+                specialInfo.content = [keywordArr objectAtIndex:i][@"content"];
+                specialInfo.pic = [keywordArr objectAtIndex:i][@"pic"];
+                specialInfo.title = [keywordArr objectAtIndex:i][@"title"];
                 
-                specialInfo.brandId = [p1Dic[@"brandid"] intValue];
-                specialInfo.catalogId = [p1Dic[@"catalogid"] intValue];
-                specialInfo.productId = [p1Dic[@"productid"] intValue];
+                specialInfo.triggerType = [[keywordArr objectAtIndex:i][@"triggerType"] intValue];
+                specialInfo.type = [[keywordArr objectAtIndex:i][@"platId"] intValue];
+                specialInfo.specialId = [[keywordArr objectAtIndex:i][@"id"] intValue];
+                specialInfo.areaId = [[keywordArr objectAtIndex:i][@"areaId"] intValue];
+                
+//                specialInfo.brandId = [p1Dic[@"brandid"] intValue];
+//                specialInfo.catalogId = [p1Dic[@"catalogid"] intValue];
+//                specialInfo.productId = [p1Dic[@"productid"] intValue];
                 
                 [productListInAd addObject: specialInfo];
                 [specialInfo release];
@@ -93,8 +106,8 @@
 //            }
             floor.productList = productListInAd;
             
-            NSString *keyword = dic[@"keyword"];
-            floor.keywordList = [keyword componentsSeparatedByString:@","];
+//            NSString *keyword = dic[@"keyword"];
+//            floor.keywordList = [keyword componentsSeparatedByString:@","];
             
             [adFloorList addObject:floor];
             [floor release];
@@ -104,21 +117,6 @@
         page.adFloorList = adFloorList;
         return [page autorelease];
     }
-    
-    //Test
-//    NSMutableArray *resultList = [[[NSMutableArray alloc] init] autorelease];
-//    SpecialRecommendInfo *specialInfo = [[SpecialRecommendInfo alloc] init];
-//    specialInfo.specialId = @"123";
-//    specialInfo.imageUrl = @"http://www.111.com.cn/cmsPage/show.do?pageId=50270";
-//    specialInfo.name = @"测试";
-//    specialInfo.type = 1;
-//    specialInfo.sindex = 2;
-//    specialInfo.specialType = 3;
-//    [resultList addObject:specialInfo];
-//    [specialInfo release];
-//    Page *page = [[Page alloc] init];
-//    page.objList = resultList;
-//    return [page autorelease];
     return nil;
 }
 

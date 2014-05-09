@@ -8,30 +8,37 @@
 
 #import <UIKit/UIKit.h>
 #import "AdvertisingPromotionVO.h"
+#import "AdFloorInfo.h"
+#import "SpecialRecommendInfo.h"
+
 @protocol HomePageModelACellDelegate;
+
 @interface HomePageModelACell : UITableViewCell
 {
-    UIImageView *titleImageView;
-    UIImageView* headImgView;
     UIImageView*adBg;
     NSArray* keywordsArray;
-    NSMutableArray* keywordBtns;
-    UIImageView* bigImg,*firstImg,*secImg;
+    UIImageView* bigImg;
     UIView* promotionImg;
-    UILabel* advTitle,*firstTit,*firstSubTit,*secTit,*secSubTit;//,*bigTitle,*bigSubTit;
+    
+    UIButton *headBtn;
+    
+    BOOL isLeft;
     id <HomePageModelACellDelegate>delegate;
 }
+
 @property(nonatomic,assign)id <HomePageModelACellDelegate>delegate;
 @property(nonatomic,retain)NSArray* keywordsArray;
-@property(nonatomic,retain)UILabel * advTitle;
+@property(nonatomic,assign)BOOL isLeft;
 - (void)freshCell:(int)tag style:(int)style title:(NSString*)title;
-- (void)loadTitleImage:(NSString *)imageUrl;
 -(void)loadBigImg:(NSString*)bigImgStr title:(NSString*)title subTitle:(NSString*)subtit;
 -(void)loadFistImg:(NSString*)firstImgStr title:(NSString*)title subTitle:(NSString*)subtit;
 -(void)loadsecondImg:(NSString*)secondImgStr title:(NSString*)title subTitle:(NSString*)subtit;
+-(void)loadBtn:(AdFloorInfo *)floor;
+-(void)loadHeadBtn:(AdFloorInfo *)floor;
 @end
 @protocol HomePageModelACellDelegate <NSObject>
 -(void)keywordBtnSelceted:(UIButton*)button type:(int)type;
 -(void)promotionTapcell:(HomePageModelACell*)cell withIdenty:(int)tag;
-
+-(void)pushSmallBtn:(HomePageModelACell*)cell withIdent:(int)tag;
+-(void)pushHeadBtn:(HomePageModelACell*)cell;
 @end

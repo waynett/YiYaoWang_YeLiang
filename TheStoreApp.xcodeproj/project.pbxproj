@@ -658,6 +658,8 @@
 		67E41CF117EEED3C00CD16F2 /* InvoiceInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 67E41CF017EEED3C00CD16F2 /* InvoiceInfo.m */; };
 		67E41CF917EF022C00CD16F2 /* OrderDetailInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 67E41CF817EF022C00CD16F2 /* OrderDetailInfo.m */; };
 		67E67EFD1869292900BC97F7 /* groupLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 67E67EFC1869292900BC97F7 /* groupLogo.png */; };
+		67E7003C191A3264007F4E14 /* leftV.png in Resources */ = {isa = PBXBuildFile; fileRef = 67E7003A191A3264007F4E14 /* leftV.png */; };
+		67E7003D191A3264007F4E14 /* rightV.png in Resources */ = {isa = PBXBuildFile; fileRef = 67E7003B191A3264007F4E14 /* rightV.png */; };
 		67E8671817F852F200EDDB61 /* YWBrowseService.m in Sources */ = {isa = PBXBuildFile; fileRef = 67E8671717F852F200EDDB61 /* YWBrowseService.m */; };
 		67E8672117F862E200EDDB61 /* YWSystemService.m in Sources */ = {isa = PBXBuildFile; fileRef = 67E8672017F862E200EDDB61 /* YWSystemService.m */; };
 		9B00FB1A1609C00000744938 /* segLeft@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B00FB141609C00000744938 /* segLeft@2x.png */; };
@@ -2612,6 +2614,8 @@
 		67E41CF717EF022C00CD16F2 /* OrderDetailInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrderDetailInfo.h; sourceTree = "<group>"; };
 		67E41CF817EF022C00CD16F2 /* OrderDetailInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrderDetailInfo.m; sourceTree = "<group>"; };
 		67E67EFC1869292900BC97F7 /* groupLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = groupLogo.png; sourceTree = "<group>"; };
+		67E7003A191A3264007F4E14 /* leftV.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = leftV.png; sourceTree = "<group>"; };
+		67E7003B191A3264007F4E14 /* rightV.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rightV.png; sourceTree = "<group>"; };
 		67E8671617F852F200EDDB61 /* YWBrowseService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YWBrowseService.h; path = YWLib/YWBrowseService.h; sourceTree = "<group>"; };
 		67E8671717F852F200EDDB61 /* YWBrowseService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YWBrowseService.m; path = YWLib/YWBrowseService.m; sourceTree = "<group>"; };
 		67E8671F17F862E200EDDB61 /* YWSystemService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YWSystemService.h; path = YWLib/YWSystemService.h; sourceTree = "<group>"; };
@@ -5255,6 +5259,7 @@
 		672CE7001910CEE4003DFBF3 /* Resources_New */ = {
 			isa = PBXGroup;
 			children = (
+				67E70039191A3264007F4E14 /* HomePage_Image */,
 				672CE7011910CEE4003DFBF3 /* Category_Image */,
 			);
 			path = Resources_New;
@@ -5603,6 +5608,15 @@
 				A3E6911218E91D550023D8B4 /* RecommendViewController.xib */,
 			);
 			name = ViewController;
+			sourceTree = "<group>";
+		};
+		67E70039191A3264007F4E14 /* HomePage_Image */ = {
+			isa = PBXGroup;
+			children = (
+				67E7003A191A3264007F4E14 /* leftV.png */,
+				67E7003B191A3264007F4E14 /* rightV.png */,
+			);
+			path = HomePage_Image;
 			sourceTree = "<group>";
 		};
 		9B1C16E315FB452200B48672 /* Res */ = {
@@ -7644,6 +7658,7 @@
 				A2822FC9156539480092FE0A /* tuangou_scroll.png in Resources */,
 				A2ADD2ED15662E3200294581 /* add_enable.png in Resources */,
 				A2ADD2EE15662E3200294581 /* minus_enable.png in Resources */,
+				67E7003D191A3264007F4E14 /* rightV.png in Resources */,
 				A2F4128C1567DCBF00EBCE7A /* Gift.xib in Resources */,
 				A2C3A8F81569EA840091A770 /* gift_nil.png in Resources */,
 				A2C3A8FF156A6DDD0091A770 /* cart_giftBg.png in Resources */,
@@ -8031,6 +8046,7 @@
 				F04482E8164260C300664039 /* title_left_edit_sel.png in Resources */,
 				F04482E9164260C300664039 /* title_left_edit.png in Resources */,
 				9B865BA11642657100DDE9E1 /* wrCornerMarkGuess@2x.png in Resources */,
+				67E7003C191A3264007F4E14 /* leftV.png in Resources */,
 				9B865BA31642657100DDE9E1 /* wrCornerMarkSuper@2x.png in Resources */,
 				9B865BA61642659100DDE9E1 /* wrCornerMarkHalf@2x.png in Resources */,
 				6762754B1851C9C300E440E5 /* about_logo.png in Resources */,
